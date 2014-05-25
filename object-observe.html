@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<script src="components/undo/undo.js"></script>
+	<script src="components/platform/platform.js"></script>
+	<title>Undo.js demo</title>
+	<style>
+		body { font:62.5% Verdana,Arial,sans-serif; }
+		#text { border: 1px dotted green; }
+	</style>
+	<script>
+	document.addEventListener( "DOMContentLoaded" , function () {
+
+		var x = document.querySelector.bind( document );
+	    var text = x( "#text" );
+	    var startValue = text.innerHTML;
+	    var timer;
+ 	    var undo = x( ".undo" );
+	    var redo = x( ".redo" );
+	    var save = x( ".save" );
+	    var dirty = x( ".dirty" );
+	   	var t = document.querySelector( "#template" );
+	   	var stack = new Undo.Stack();
+		var modelContent = {
+			content: ''
+		};
+
+		function observer( change ) {
+			var newValue = change.object[ change.name ];
+			stack.execute(new EditCommand( text, startValue, newValue ));
+			startValue = newValue;
+		}
+
+		Object.observe(modelContent, function ( changes ) {
+		  changes.forEach( observer );
+		});
+
+		text.oninput = function ( change ){
+			modelContent.content = text.textContent;
+		};
+
+		
+		var EditCommand = Undo.Command.extend({
+			constructor: function( textarea, oldValue, newValue ) {
+				this.textarea = textarea;
+				this.oldValue = oldValue;
+				this.newValue = newValue;
+			},
+			execute: function () {
+			},
+			undo: function () {
+				this.textarea.innerHTML = this.oldValue;
+			},
+			
+			redo: function () {
+				this.textarea.innerHTML = this.newValue;
+			}
+		});
+
+
+	    function stackUI () {
+	    	!stack.canUndo()? undo.disabled = true : undo.disabled = false;
+	    	!stack.canRedo()? redo.disabled = true : redo.disabled = false;
+	        stack.dirty()? dirty.style.visibility = "hidden": "visible";
+	    }
+	    stackUI();
+
+	    undo.addEventListener( "click", function () {
+	    	stack["undo"]();
+	    	return false;
+	    });
+
+	    redo.addEventListener( "click", function () {
+	    	stack["redo"]();
+	    	return false;
+	    });
+
+	    save.addEventListener( "click", function () {
+	    	stack["save"]();
+	    	return false;
+	    });
+
+	    stack.changed = function () {
+	        stackUI();
+	    };		
+
+	});
+	</script>
+</head>
+<body>
+	<button class="undo" href="#">Undo</button>
+	<button class="redo" href="#">Redo</button>
+	<button class="save" href="#">Save<span class="dirty">*</span></button>
+	<div id="text" contenteditable="true">
+		<template id="template" bind="{{modelContent}}">
+			{{content}}
+		</template>
+	</div>
+</body>
+</html>
