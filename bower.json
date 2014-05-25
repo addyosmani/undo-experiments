@@ -1,0 +1,27 @@
+{
+  "name": "undo-experiments",
+  "version": "0.0.1",
+  "homepage": "https://github.com/addyosmani/undo-experiments",
+  "authors": [
+    "Addy Osmani <addyosmani@gmail.com>"
+  ],
+  "description": "Undo experiments with Mutation Observers And Object.observe()",
+  "main": "index.html",
+  "moduleType": [
+    "globals"
+  ],
+  "keywords": [
+    "undo",
+    "mutation",
+    "observe"
+  ],
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
