@@ -10,80 +10,79 @@
 		#text { border: 1px dotted green; }
 	</style>
 	<script>
-	document.addEventListener( "DOMContentLoaded" , function () {
+	document.addEventListener("DOMContentLoaded", function () {
 
-		var x = document.querySelector.bind( document );
-	    var text = x( "#text" );
+	    var x = document.querySelector.bind(document);
+	    var text = x("#text");
 	    var startValue = text.innerHTML;
 	    var timer;
- 	    var undo = x( ".undo" );
-	    var redo = x( ".redo" );
-	    var save = x( ".save" );
-	    var dirty = x( ".dirty" );
-	   	var t = document.querySelector( "#template" );
-	   	var stack = new Undo.Stack();
-		var modelContent = {
-			content: ''
-		};
+	    var undo = x(".undo");
+	    var redo = x(".redo");
+	    var save = x(".save");
+	    var dirty = x(".dirty");
+	    var t = document.querySelector("#template");
+	    var stack = new Undo.Stack();
+	    var modelContent = {
+	        content: ''
+	    };
 
-		function observer( change ) {
-			var newValue = change.object[ change.name ];
-			stack.execute(new EditCommand( text, startValue, newValue ));
-			startValue = newValue;
-		}
+	    function observer(change) {
+	        var newValue = change.object[change.name];
+	        stack.execute(new EditCommand(text, startValue, newValue));
+	        startValue = newValue;
+	    }
 
-		Object.observe(modelContent, function ( changes ) {
-		  changes.forEach( observer );
-		});
+	    Object.observe(modelContent, function (changes) {
+	        changes.forEach(observer);
+	    });
 
-		text.oninput = function ( change ){
-			modelContent.content = text.textContent;
-		};
-
-		
-		var EditCommand = Undo.Command.extend({
-			constructor: function( textarea, oldValue, newValue ) {
-				this.textarea = textarea;
-				this.oldValue = oldValue;
-				this.newValue = newValue;
-			},
-			execute: function () {
-			},
-			undo: function () {
-				this.textarea.innerHTML = this.oldValue;
-			},
-			
-			redo: function () {
-				this.textarea.innerHTML = this.newValue;
-			}
-		});
+	    text.oninput = function (change) {
+	        modelContent.content = text.textContent;
+	    };
 
 
-	    function stackUI () {
-	    	!stack.canUndo()? undo.disabled = true : undo.disabled = false;
-	    	!stack.canRedo()? redo.disabled = true : redo.disabled = false;
-	        stack.dirty()? dirty.style.visibility = "hidden": "visible";
+	    var EditCommand = Undo.Command.extend({
+	        constructor: function (textarea, oldValue, newValue) {
+	            this.textarea = textarea;
+	            this.oldValue = oldValue;
+	            this.newValue = newValue;
+	        },
+	        execute: function () {},
+	        undo: function () {
+	            this.textarea.innerHTML = this.oldValue;
+	        },
+
+	        redo: function () {
+	            this.textarea.innerHTML = this.newValue;
+	        }
+	    });
+
+
+	    function stackUI() {
+	        !stack.canUndo() ? undo.disabled = true : undo.disabled = false;
+	        !stack.canRedo() ? redo.disabled = true : redo.disabled = false;
+	        stack.dirty() ? dirty.style.visibility = "hidden" : "visible";
 	    }
 	    stackUI();
 
-	    undo.addEventListener( "click", function () {
-	    	stack["undo"]();
-	    	return false;
+	    undo.addEventListener("click", function () {
+	        stack["undo"]();
+	        return false;
 	    });
 
-	    redo.addEventListener( "click", function () {
-	    	stack["redo"]();
-	    	return false;
+	    redo.addEventListener("click", function () {
+	        stack["redo"]();
+	        return false;
 	    });
 
-	    save.addEventListener( "click", function () {
-	    	stack["save"]();
-	    	return false;
+	    save.addEventListener("click", function () {
+	        stack["save"]();
+	        return false;
 	    });
 
 	    stack.changed = function () {
 	        stackUI();
-	    };		
+	    };
 
 	});
 	</script>
