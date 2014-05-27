@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, minimal-ui">
+	<script src="components/undo/undo.js"></script>
+	<script src="components/platform/platform.js"></script>
+	<title>Undo.js demo</title>
+	<link rel="stylesheet" href="todomvc.css">
+
+	<script>
+	document.addEventListener("DOMContentLoaded", function () {
+
+	    var x = document.querySelector.bind(document);
+	    var text = x("#todo-list");
+	    var startValue = text.innerHTML;
+	    var blocked = false;
+	    var undo = x(".undo");
+	    var redo = x(".redo");
+	    var save = x(".save");
+	    var dirty = x(".dirty");
+	    var input = x("#new-todo");
+	    var form = x("#addTodos");
+	    var stack = new Undo.Stack();
+	    var model = { 
+	    	list: [] 
+	    };
+	    var t = x("#my-template");
+	    t.model = model;
+
+	    var MutationObserver = window.MutationObserver || window.WebKitMutationObserver || window.MozMutationObserver;
+
+	    var observer = new MutationObserver(function (mutations) {
+	        if (!blocked) {
+	            var newValue = text.innerHTML;
+	            stack.execute(new EditCommand(text, startValue, newValue));
+	            startValue = newValue;
+	            blocked = false;
+	        }
+	    });
+
+	    observer.observe(text, {
+	        attributes: true,
+	        childList: true,
+	        characterData: true,
+	        characterDataOldValue: true,
+	        subtree: true
+	    });
+
+	    var EditCommand = Undo.Command.extend({
+	        constructor: function (textarea, oldValue, newValue) {
+	            this.textarea = textarea;
+	            this.oldValue = oldValue;
+	            this.newValue = newValue;
+	        },
+	        execute: function () {},
+	        undo: function () {
+	            blocked = true;
+	            this.textarea.innerHTML = this.oldValue;
+	        },
+
+	        redo: function () {
+	            blocked = true;
+	            this.textarea.innerHTML = this.newValue;
+	        }
+	    });
+
+
+
+	    function stackUI() {
+	        !stack.canUndo() ? undo.disabled = true : undo.disabled = false;
+	        !stack.canRedo() ? redo.disabled = true : redo.disabled = false;
+	        stack.dirty() ? dirty.style.visibility = "hidden" : "visible";
+	    }
+	    stackUI();
+
+	    undo.addEventListener("click", function () {
+	        stack["undo"]();
+	        return false;
+	    });
+
+	    redo.addEventListener("click", function () {
+	        stack["redo"]();
+	        return false;
+	    });
+
+	    save.addEventListener("click", function () {
+	        stack["save"]();
+	        return false;
+	    });
+
+	    stack.changed = function () {
+	        stackUI();
+	    };
+
+	    form.onsubmit = function () {
+	    	model.list.push({ label: input.value });
+	        input.value = '';
+	    	return false;
+	    }
+	});
+	</script>
+</head>
+<body>
+	<button class="undo btn" href="#">Undo</button>
+	<button class="redo btn" href="#">Redo</button>
+	<button class="save btn" href="#">Save<span class="dirty">*</span></button>
+
+
+	<section id="todoapp">
+			<header id="header">
+				<h1>todos</h1>
+				<form id="addTodos">
+				<input id="new-todo" placeholder="What needs to be done?" autofocus>
+				</form>
+			</header>
+			<section id="main">
+				<input id="toggle-all" type="checkbox">
+				<ul id="todo-list">
+					<template id="my-template" repeat="{{list}}">
+						<li>
+							<div class="view">
+								<input class="toggle" type="checkbox">
+								<label contenteditable="true">{{label}}</label>
+							</div>
+						</li>
+					</template>
+				</ul>
+			</section>
+
+</body>
+</html>
