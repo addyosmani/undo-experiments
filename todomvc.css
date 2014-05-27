@@ -35,6 +35,7 @@ body {
 	-ms-font-smoothing: antialiased;
 	font-smoothing: antialiased;
 	font-weight: 300;
+	padding-top: 40px;
 }
 
 button,
